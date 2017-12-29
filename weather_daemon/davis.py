@@ -1,13 +1,11 @@
 #!/usr/bin/env python
 #############################################
-#   Title: Numato Ethernet Relay Interface  #
-# Project: VTGS Relay Control Daemon        #
-# Version: 2.0                              #
-#    Date: Dec 15, 2017                     #
+#   Title: Davis Vantage Pro2 Ethernet Interface  #
+# Project: VTGS Weather Daemon              #
+# Version: 1.0                              #
+#    Date: Dec 27, 2017                     #
 #  Author: Zach Leffke, KJ4QLP              #
 # Comment:                                  #
-#   -Relay Control Daemon                   #
-#   -Intended for use with systemd          #
 #############################################
 
 import sys
@@ -23,6 +21,8 @@ import numpy
 
 from Queue import Queue
 from watchdog_timer import *
+import weather.temp as temp
+
 
 class Ethernet_VantagePro2(threading.Thread):
     def __init__ (self, args):
@@ -50,11 +50,16 @@ class Ethernet_VantagePro2(threading.Thread):
 
         if (not self.connected):
             self._connect()
- 
+            self.sock.send('\n') #wake up Weather Station
+            self.sock.recvfrom(1024)
+            data, addr = self.sock.recvfrom(1024)
         while (not self._stop.isSet()):
             while (not self.loop_q.empty()):
-                msg = self.loop_q.get()        
+                msg = self.loop_q.get()
+                self.rx_q.put(msg)        
                 print msg
+                for k in msg.keys():
+                    print k, msg[k]
             time.sleep(0.25) #Query station every 5 seconds
 
         self.loop_wd.stop()
@@ -70,7 +75,7 @@ class Ethernet_VantagePro2(threading.Thread):
 
     def _parse_loop_msg(self, frame, ts = None):
         #print msg['ts'], len(msg['msg']), 
-        print binascii.hexlify(frame)
+        #print binascii.hexlify(frame)
         msg = {}
         msg['ts'] = ts
         #print numpy.uint8(struct.unpack('<B',frame[0:1]))[0] #ACK
@@ -87,15 +92,15 @@ class Ethernet_VantagePro2(threading.Thread):
         msg['next_record']  = binascii.hexlify(frame[6:8]) #NExt Record See Manual
         msg['barometer']    = round(numpy.int16(struct.unpack('<H',frame[8:10]))[0]/1000.0, 6) #In. Hg.
         msg['inside_temp']  = round(numpy.int16(struct.unpack('<h',frame[10:12]))[0]/10.0, 6) #deg F
-        msg['inside_hum']   = round(numpy.int8(struct.unpack('<B',frame[12:13]))[0]/100.0, 6) # % humidity
+        msg['inside_hum']   = numpy.int8(struct.unpack('<B',frame[12:13]))[0] # % humidity
         msg['outside_temp'] = round(numpy.int16(struct.unpack('<h',frame[13:15]))[0]/10.0, 6) #deg F
         msg['wind_speed']   = numpy.uint8(struct.unpack('<B',frame[15:16]))[0] #mph
-        msg['wind_avg']     = numpy.uint8(struct.unpack('<B',frame[16:17]))[0] #mph
+        msg['wind_avg']     = numpy.uint8(struct.unpack('<B',frame[16:17]))[0] #mph, 10 minute average
         msg['wind_dir']     = numpy.uint16(struct.unpack('<H',frame[17:19]))[0] #deg F
         msg['extra_temps']  = binascii.hexlify(frame[19:26])
         msg['soil_temps']   = binascii.hexlify(frame[26:30])
         msg['leaf_temps']   = binascii.hexlify(frame[30:34])
-        msg['outside_hum']  = round(numpy.int8(struct.unpack('<B',frame[34:35]))[0]/100.0, 6) # % humidity
+        msg['outside_hum']  = numpy.int8(struct.unpack('<B',frame[34:35]))[0]# % humidity
         msg['leaf_temps']   = binascii.hexlify(frame[35:42])
         msg['rain_rate']    = numpy.uint16(struct.unpack('<H',frame[42:44]))[0]/100.0 #inches/hour
         msg['uv_index']     = numpy.uint8(struct.unpack('<B',frame[44:45]))[0]/10.0 #uv index
@@ -110,6 +115,12 @@ class Ethernet_VantagePro2(threading.Thread):
         msg['year_et']      = numpy.uint16(struct.unpack('<H',frame[61:63]))[0]/100.0 #inches/hour
         msg['the_rest']     = binascii.hexlify(frame[47:])
         #print msg['bar_trend']
+
+        #Derived Fields
+        msg['dew_point_out']    = temp.calc_dewpoint(msg['outside_temp'], msg['outside_hum'])
+        msg['dew_point_in']     = temp.calc_dewpoint(msg['inside_temp'], msg['inside_hum'])
+        msg['wind_chill']       = temp.calc_wind_chill(msg['outside_temp'], msg['wind_speed'], msg['wind_avg'])
+        msg['heat_index']       = temp.calc_heat_index(msg['outside_temp'], msg['outside_hum'])
         return msg
 
     def _loop_cmd(self):
