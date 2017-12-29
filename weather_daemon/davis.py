@@ -82,7 +82,7 @@ class Ethernet_VantagePro2(threading.Thread):
         #0 = Steady
         #20 = Rising Slowly
         #60 = Rising Rapidly   
-        msg['bar_trend']    = int(frame[4])    #Bar Trend
+        msg['bar_trend']    = numpy.int8(struct.unpack('<B',frame[4:5]))[0] #Bar Trend
         msg['pkt_type']     = int(frame[5])    #Packet Type, 0 = LOOP, 1 = LOOP2
         msg['next_record']  = binascii.hexlify(frame[6:8]) #NExt Record See Manual
         msg['barometer']    = round(numpy.int16(struct.unpack('<H',frame[8:10]))[0]/1000.0, 6) #In. Hg.
@@ -98,16 +98,16 @@ class Ethernet_VantagePro2(threading.Thread):
         msg['outside_hum']  = round(numpy.int8(struct.unpack('<B',frame[34:35]))[0]/100.0, 6) # % humidity
         msg['leaf_temps']   = binascii.hexlify(frame[35:42])
         msg['rain_rate']    = numpy.uint16(struct.unpack('<H',frame[42:44]))[0]/100.0 #inches/hour
-        msg['uv_index']     = numpy.uint8(struct.unpack('<B',frame[44:45]))[0] #uv index
+        msg['uv_index']     = numpy.uint8(struct.unpack('<B',frame[44:45]))[0]/10.0 #uv index
         msg['solar_rad']    = round(numpy.uint16(struct.unpack('<H',frame[45:47]))[0], 6) #watts/m^2
         msg['battery']      = numpy.uint16(struct.unpack('<H',frame[88:90]))[0]*300.0/512.0/100.0 #Volts
         msg['storm_date']   = binascii.hexlify(frame[49:51])
         msg['day_rain']     = numpy.uint16(struct.unpack('<H',frame[51:53]))[0]/100.0 #inches/hour
         msg['month_rain']   = numpy.uint16(struct.unpack('<H',frame[53:55]))[0]/100.0 #inches/hour
         msg['year_rain']    = numpy.uint16(struct.unpack('<H',frame[55:57]))[0]/100.0 #inches/hour
-        msg['day_et']     = numpy.uint16(struct.unpack('<H',frame[57:59]))[0]/1000.0 #inches/hour
-        msg['month_et']   = numpy.uint16(struct.unpack('<H',frame[59:61]))[0]/100.0 #inches/hour
-        msg['year_et']    = numpy.uint16(struct.unpack('<H',frame[61:63]))[0]/100.0 #inches/hour
+        msg['day_et']       = numpy.uint16(struct.unpack('<H',frame[57:59]))[0]/1000.0 #inches/hour
+        msg['month_et']     = numpy.uint16(struct.unpack('<H',frame[59:61]))[0]/100.0 #inches/hour
+        msg['year_et']      = numpy.uint16(struct.unpack('<H',frame[61:63]))[0]/100.0 #inches/hour
         msg['the_rest']     = binascii.hexlify(frame[47:])
         #print msg['bar_trend']
         return msg
