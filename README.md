@@ -1,4 +1,4 @@
-# CTGS Weather Monitor Daemon
+# VTGS Weather Monitor Daemon
 Daemon for monitoring the Davis VantagePro2 weather station.  This daemon extracts data from an Ethernet-connected Davis weather station
 (specifically a VantagePro2) and sends messages to a RabbitMQ broker. Its
 overall design:
