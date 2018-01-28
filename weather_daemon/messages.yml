@@ -1,0 +1,165 @@
+#
+# YAML mesage definition file for the VTGS weather daemon/monitor.
+# Messages are defined here as an unnamed list of dictionaries.  Each
+# entry (dictionary) must specify the message routing key, time delay
+# (inter-message time) in seconds, and the list of keys tht will be
+# included in each message.
+# DANGER: Make note of the leading "-" which defines each entry in the
+# list.  Without that, the file will not parse.
+# REVIEW:DANGER: There is no checking of keys performed in the daemon
+# code.  If a key is specified here that doesn't exist in the data
+# extraction code (see davisethernet/read.py) the daemon will probably
+# crash and/or throw an infinite number of error messages.
+# REVIEW: This is a first cut at a structure for message definition.
+# it probably could be made better (but do we need to?)
+
+-
+   routing_key: weather.wind
+   delay: 2
+   keys:
+      - wind_speed
+      - wind_dir
+      - wind_spd_avg_2
+      - wind_spd_avg_10
+      - wind_gust_10
+      - wind_gust_10
+
+-
+   routing_key: weather.inside.temperature
+   delay: 3
+   keys:
+      - inside_temp
+
+-
+   routing_key: weather.outside.temperature
+   delay: 3
+   keys:
+       - outside_temp
+
+-
+   routing_key: weather.inside.humidity
+   delay: 3
+   keys:
+      - inside_humid
+
+-
+   routing_key: weather.outside.humidity
+   delay: 3
+   keys:
+      - outside_humid
+
+-
+   routing_key: weather.outside.solar
+   delay: 5
+   keys:
+      - sunrise
+      - sunset
+      - uv
+      - solar_rad
+
+-
+   routing_key: weather.outside.rain
+   delay: 5
+   keys:
+      - rain_rate
+      - storm_rain
+      - storm_start
+      - rain_last_15
+      - rain_last_24
+      - rain_day
+
+-
+   routing_key: weather.outside.feelslike
+   delay: 5
+   keys:
+      - heat_index
+      - wind_chill
+      - THSW_index
+
+-
+   routing_key: weather.barometer
+   delay: 7
+   keys:
+      - bar_trend
+      - barometer
+
+-
+   routing_key: weather.trending.barometer
+   delay: 13
+   keys:
+      - day_high_bar
+      - time_high_bar
+      - day_low_bar
+      - time_low_bar
+      - month_high_bar
+      - month_low_bar
+      - year_high_bar
+      - year_low_bar
+
+-
+   routing_key: weather.trending.wind
+   delay: 15
+   keys:
+      - daily_high_wind
+      - time_high_wind
+      - month_high_wind
+      - year_high_wind
+
+-
+   routing_key: weather.trending.inside.temperature
+   delay: 15
+   keys:
+      - daily_high_in_temp
+      - time_high_in_temp
+      - daily_low_in_temp
+      - time_low_in_temp
+      - month_high_in_temp
+      - month_low_in_temp
+      - year_high_in_temp
+      - year_low_in_temp
+
+-
+   routing_key: weather.trending.inside.humidity
+   delay: 15
+   keys:
+      - daily_high_in_hum
+      - time_high_in_hum
+      - daily_low_in_hum
+      - time_low_in_hum
+      - month_high_in_hum
+      - month_low_in_hum
+      - year_high_in_hum
+      - year_low_in_hum
+
+
+-
+   routing_key: weather.trending.outside.temperature
+   delay: 15
+   keys:
+      - daily_high_out_temp
+      - time_high_out_temp
+      - daily_low_out_temp
+      - time_low_out_temp
+      - month_high_out_temp
+      - month_low_out_temp
+      - year_high_out_temp
+      - year_low_out_temp
+
+-
+   routing_key: weather.trending.outside.solar
+   delay: 15
+   keys:
+      - daily_high_sol_rad
+      - time_high_sol_rad
+      - month_high_sol_rad
+      - year_high_sol_rad
+
+-
+   routing_key: weather.trending.outside.rainrate
+   delay: 15
+   keys:
+      - daily_high_rain_rate
+      - time_high_rain_rate
+      - hour_high_rain_rate
+      - month_high_rain_rate
+      - year_high_rain_rate
