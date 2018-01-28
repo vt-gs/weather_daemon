@@ -23,7 +23,6 @@ setup(
     url          = __url__,
     author       = __author__,
     author_email = __email__,
-    #scripts=['relay_daemon']  # executable name  
     entry_points ={
         "console_scripts": ["weather_daemon = weather_daemon.main:main"]
     }
