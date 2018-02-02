@@ -263,8 +263,8 @@ def HILOWS(sock):
             data['year_low_out_temp'] = float(struct.unpack('<h',buffer[62:64])[0])/10.0
 
             # Dew point section
-            data['daily_low_dew']  = float(struct.unpack('<H',buffer[64:66])[0])/10.0
-            data['daily_high_dew']  = float(struct.unpack('<H',buffer[66:68])[0])/10.0
+            data['daily_low_dew']  = float(struct.unpack('<H',buffer[64:66])[0])
+            data['daily_high_dew']  = float(struct.unpack('<H',buffer[66:68])[0])
             t   = struct.unpack('<H',buffer[68:70])[0]
             hr = int(t/100)
             mn = int(t-hr*100)
@@ -273,19 +273,19 @@ def HILOWS(sock):
             hr = int(t/100)
             mn = int(t-hr*100)
             data['time_high_dew'] = '{}:{}'.format(hr,mn)
-            data['month_high_dew'] = float(struct.unpack('<h',buffer[72:74])[0])/10.0
-            data['month_low_dew'] = float(struct.unpack('<h',buffer[74:76])[0])/10.0
-            data['year_high_dew'] = float(struct.unpack('<h',buffer[76:78])[0])/10.0
-            data['year_low_dew'] = float(struct.unpack('<h',buffer[78:80])[0])/10.0
+            data['month_high_dew'] = float(struct.unpack('<h',buffer[72:74])[0])
+            data['month_low_dew'] = float(struct.unpack('<h',buffer[74:76])[0])
+            data['year_high_dew'] = float(struct.unpack('<h',buffer[76:78])[0])
+            data['year_low_dew'] = float(struct.unpack('<h',buffer[78:80])[0])
 
             # Wind chill section
-            data['daily_low_wchill']  = float(struct.unpack('<h',buffer[80:82])[0])/10.0
+            data['daily_low_wchill']  = float(struct.unpack('<h',buffer[80:82])[0])
             t   = struct.unpack('<H',buffer[82:84])[0]
             hr = int(t/100)
             mn = int(t-hr*100)
             data['time_low_wchill'] = '{}:{}'.format(hr,mn)
-            data['month_low_wchill']  = float(struct.unpack('<h',buffer[84:86])[0])/10.0
-            data['year_low_wchill']  = float(struct.unpack('<h',buffer[86:88])[0])/10.0
+            data['month_low_wchill']  = float(struct.unpack('<h',buffer[84:86])[0])
+            data['year_low_wchill']  = float(struct.unpack('<h',buffer[86:88])[0])
 
             # Heat index section
             data['daily_high_heat']  = float(struct.unpack('<h',buffer[88:90])[0])
