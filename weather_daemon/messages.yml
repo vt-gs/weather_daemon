@@ -15,7 +15,7 @@
 
 -
    routing_key: weather.wind
-   delay: 60
+   delay: 5
    keys:
       - wind_speed
       - wind_dir
@@ -100,7 +100,7 @@
    routing_key: weather.trending.wind
    delay: 3600
    keys:
-      - daily_high_wind
+      - day_high_wind
       - time_high_wind
       - month_high_wind
       - year_high_wind
@@ -109,9 +109,9 @@
    routing_key: weather.trending.inside.temperature
    delay: 3600
    keys:
-      - daily_high_in_temp
+      - day_high_in_temp
       - time_high_in_temp
-      - daily_low_in_temp
+      - day_low_in_temp
       - time_low_in_temp
       - month_high_in_temp
       - month_low_in_temp
@@ -122,9 +122,9 @@
    routing_key: weather.trending.inside.humidity
    delay: 3600
    keys:
-      - daily_high_in_hum
+      - day_high_in_hum
       - time_high_in_hum
-      - daily_low_in_hum
+      - day_low_in_hum
       - time_low_in_hum
       - month_high_in_hum
       - month_low_in_hum
@@ -136,9 +136,9 @@
    routing_key: weather.trending.outside.temperature
    delay: 3600
    keys:
-      - daily_high_out_temp
+      - day_high_out_temp
       - time_high_out_temp
-      - daily_low_out_temp
+      - day_low_out_temp
       - time_low_out_temp
       - month_high_out_temp
       - month_low_out_temp
@@ -149,7 +149,7 @@
    routing_key: weather.trending.outside.solar
    delay: 3600
    keys:
-      - daily_high_sol_rad
+      - day_high_sol_rad
       - time_high_sol_rad
       - month_high_sol_rad
       - year_high_sol_rad
@@ -158,7 +158,7 @@
    routing_key: weather.trending.outside.rainrate
    delay: 3600
    keys:
-      - daily_high_rain_rate
+      - day_high_rain_rate
       - time_high_rain_rate
       - hour_high_rain_rate
       - month_high_rain_rate

@@ -61,142 +61,51 @@ from datetime import timedelta, datetime
 import logging
 import json
 import argparse
+import ConfigParser # Note that this is renamed to configparser in Python 3
 import yaml
 from threading import Thread
 from rabbitcomms import BrokerProducer
 import davisethernet.read
+import configutils
 
-
-# Default values for the command-line parameters and general hard-coded values.
-# REVIEW: Do we need to make any of these different and/or configuration items?
-# These seem like reasonable values and hard-coded values are non-critical.
-DEFAULT_WX_IP       = '10.42.0.70'
-DEFAULT_WX_PORT     = 10001
-DEFAULT_BROKER_HOST = 'localhost'
-DEFAULT_BROKER_PORT = 5672
-DEFAULT_BROKER_USER = 'guest'
-DEFAULT_BROKER_PASS = 'guest'
-DEFAULT_LOG_PATH    = './log.out'
-DEFAULT_LOG_LEVEL   = 'INFO'
-DEFAULT_YAML_FILE   = 'messages.yml'
-
-# These are hard-coded values used in this script.  REVIEW: At this point
-# it doesn't seem like they need to be configurable or changed via command
-# line parameters or configuration file.
-LOGGERNAME          = "WXD"
-LOG_FORMAT          = ('%(name)-8s %(levelname)-9s %(asctime)10s %(funcName)-35s %(message)s')
-MAX_AWAKE_TRIES     = 10
-MAIN_LOOP_DELAY     = 2.0
-EXCHANGE            = 'weather'
-EXCHANGE_TYPE       = 'topic'
-BROKER_UPDATE_DELAY = 0.1
+CONFIG_FILE_NAME = 'weather_daemon.conf'
+LOG_FORMAT       = ('%(name)-8s %(levelname)-9s %(asctime)10s %(funcName)-35s %(message)s')
 
 
 def main():
     """ Main entry point for the never-ending daemon service. """
 
     ###
-    # Parse the command line arguments to set the required and optional
-    # parameters.  The bulk of the configuration is done via the command
-    # line.
-
-    # Set up the argument parser.  Note that the "formatter_class" is, here,
-    # just being used to "widen" the help output.  It extends the allowable
-    # with to 50 characters rather then the comically narrow 20 characters.
-    parser = argparse.ArgumentParser(description="Weather Station Reporting Daemon",
-                                     formatter_class=lambda prog: argparse.HelpFormatter(prog,max_help_position=50))
-
-    # Define the parameters we need/expect from the command line.  Note that
-    # all the defaut values are specified as constants.
-    wx = parser.add_argument_group('Weather station connection settings')
-    wx.add_argument('--wx_ip',
-                       dest='wx_ip',
-                       type=str,
-                       default=DEFAULT_WX_IP,
-                       help="Weather Station IP",
-                       action="store")
-    wx.add_argument('--wx_port',
-                       dest='wx_port',
-                       type=int,
-                       default=DEFAULT_WX_PORT,
-                       help="Weather Station Port",
-                       action="store")
-
-    wx = parser.add_argument_group('Message broker connection settings')
-    wx.add_argument('--brk_ip',
-                       dest='brk_ip',
-                       type=str,
-                       default=DEFAULT_BROKER_HOST,
-                       help="AMQP Broker IP",
-                       action="store")
-    wx.add_argument('--brk_port',
-                       dest='brk_port',
-                       type=int,
-                       default=DEFAULT_BROKER_PORT,
-                       help="AMQP Broker Port",
-                       action="store")
-    wx.add_argument('--brk_user',
-                       dest='brk_user',
-                       type=str,
-                       default=DEFAULT_BROKER_USER,
-                       help="AMQP Broker User",
-                       action="store")
-    wx.add_argument('--brk_pass',
-                       dest='brk_pass',
-                       type=str,
-                       default=DEFAULT_BROKER_PASS,
-                       help="AMQP Broker Password",
-                       action="store")
-
-    other = parser.add_argument_group('Other daemon settings')
-    other.add_argument('--log_path',
-                       dest='log_path',
-                       type=str,
-                       default=DEFAULT_LOG_PATH,
-                       help="Daemon logging path",
-                       action="store")
-    other.add_argument('--log_level',
-                       dest='log_level',
-                       type=str,
-                       default=DEFAULT_LOG_LEVEL,
-                       help="Daemon logging path",
-                       action="store")
-    other.add_argument('--log_to_file',
-                       dest='log_to_file',
-                       help="Logging sent to file (default False)",
-                       action="store_true")
-    other.add_argument('--message_yaml_file',
-                       dest='message_yaml_file',
-                       default=DEFAULT_YAML_FILE,
-                       help="Name of file containing message definitions",
-                       action="store")
-
-    args = parser.parse_args()
+    # Load the configuration/setup.  Parameters will be loaded from a collection
+    # of file locations (see the configutils module) as well as the command line
+    # parameters.
+    config = configutils.load_config(CONFIG_FILE_NAME)
+    #configutils.prettyprint(config)
     #
     ###
 
     ###
     # Set up the logging.  Some of these parameters were pulled from the command
     # line so we had to wait until here to set this up.
-    LOGGER = logging.getLogger(LOGGERNAME)
-    if args.log_level.upper() == 'DEBUG':
-        LOGGER.setLevel(logging.DEBUG)
-    elif args.log_level.upper() == 'INFO':
-        LOGGER.setLevel(logging.INFO)
-    elif args.log_level.upper() == 'WARNING':
-        LOGGER.setLevel(logging.WARNING)
-    elif args.log_level.upper() == 'ERROR':
-        LOGGER.setLevel(logging.ERROR)
+    logger = logging.getLogger( config.get('logging', 'logger_name') )
+    if config.get('logging', 'level').upper() == 'DEBUG':
+        logger.setLevel(logging.DEBUG)
+    elif config.get('logging', 'level').upper() == 'INFO':
+        logger.setLevel(logging.INFO)
+    elif config.get('logging', 'level').upper() == 'WARNING':
+        logger.setLevel(logging.WARNING)
+    elif config.get('logging', 'level').upper() == 'ERROR':
+        logger.setLevel(logging.ERROR)
     else:
-        LOGGER.setLevel(logging.CRITICAL)
+        logger.setLevel(logging.CRITICAL)
 
-    if args.log_to_file:
-        HANDLER = logging.FileHandler(args.log_path)
+    if config.getboolean('logging', 'log_to_file'):
+        handler = logging.FileHandler(args.log_path)
     else:
-        HANDLER = logging.StreamHandler(sys.stdout)
-    FORMATTER = logging.Formatter(LOG_FORMAT)
-    HANDLER.setFormatter(FORMATTER)
-    LOGGER.addHandler(HANDLER)
+        handler = logging.StreamHandler(sys.stdout)
+    formatter = logging.Formatter(LOG_FORMAT)
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
     #
     ###
 
@@ -205,7 +114,7 @@ def main():
     # DANGER: There is no try around this so if it fails the script will
     # fail to start.  REVIEW: This seems like a reasonable choice if we
     # haven't or can't define messages but it may need to be looked at.
-    with open(args.message_yaml_file, 'r') as stream:
+    with open(config.get('defaults', 'yaml_file'), 'r') as stream:
         messages = yaml.load(stream)
     #
     ###
@@ -215,10 +124,16 @@ def main():
     # which is, at this point, simply an instance of the BrokerProducer from
     # the VTGS 'rabbitcomms' package.  No customization or derived class is
     # needed (for now).
-    amqp_url      = 'amqp://{}:{}@{}:{}/%2F'.format(args.brk_user,
-                     args.brk_pass, args.brk_ip, args.brk_port)
-    producer = BrokerProducer(amqp_url, EXCHANGE, exchange_type=EXCHANGE_TYPE,
-                            loggername=LOGGERNAME, updatedelay=BROKER_UPDATE_DELAY)
+    amqp_url      = 'amqp://{}:{}@{}:{}/%2F'.format(
+                         config.get('broker', 'user'),
+                         config.get('broker', 'pass'),
+                         config.get('broker', 'host'),
+                         config.get('broker', 'port'))
+    producer = BrokerProducer(amqp_url,
+                              config.get('broker', 'exchange'),
+                              exchange_type=config.get('broker', 'exchange_type'),
+                              loggername=config.get('logging', 'logger_name'),
+                              updatedelay=config.getfloat('broker', 'update_delay'))
     # Since the BrokerProducer class is not threaded but we might need to fire off
     # a lot of messages "at the same time" we'll set up a thread to run the
     # consumer.  This allows us to jam a lot of messages into the producer
@@ -253,7 +168,9 @@ def main():
     # Connect to the Davis device.  This is just the initial attempt to
     # connect.  We'll verify the connection every time through the loop to
     # ensure we always have a connection.
-    sock = davisethernet.connect(args.wx_ip, args.wx_port, num_retry=5, retry_delay=2, timeout=2)
+    wx_ip = config.get('station', 'host')
+    wx_port = config.getint('station', 'port')
+    sock = davisethernet.connect(wx_ip, wx_port, num_retry=5, retry_delay=2, timeout=2)
     while True:
         # ...each time through the loop...
         # when are we?
@@ -263,17 +180,19 @@ def main():
         # doesnt really "check" that the connection is live.  Under Linux we
         # may not get that notice until we try to communicate via the socket.
         while sock is None:
-            LOGGER.debug('Cannot connect to weather station at {}:{}'.format(args.wx_ip, args.wx_port))
+            logger.debug('Cannot connect to weather station at {}:{}'.format(wx_ip, wx_port))
             # REVIEW: Probably should fire off a message to the broker if we
             # fail to get a connection after a certain amount of time.
-            sock = davisethernet.connect(args.wx_ip, args.wx_port, num_retry=5, retry_delay=2, timeout=2)
+            sock = davisethernet.connect(wx_ip, wx_port, num_retry=5, retry_delay=2, timeout=2)
             time.sleep(10)
 
         # Presumably we have a connection so try to wake the device.
         device_awake = davisethernet.wakedevice(sock, num_retry=3, retry_delay=1)
         awake_tries = 0
+        brk_ip = config.get('broker', 'host')
+        brk_port = config.getint('broker', 'port')
         while not device_awake:
-            LOGGER.debug('Cannot wake weather station at {}:{}'.format(args.brk_ip, args.brk_port))
+            LOGGER.debug('Cannot wake weather station at {}:{}'.format(brk_ip, brk_port))
             # REVIEW: Probably should fire off a message to the broker if we
             # fail to get a connection after a certain amount of time.
             device_awake = davisethernet.wakedevice(sock, num_retry=3, retry_delay=1)
@@ -327,7 +246,7 @@ def main():
         # the calling rate to the DAVIS device.  REVIEW: The delay specified
         # was pulled out of the air - it's not based on much more than a
         # guess but it seems reasonable.
-        time.sleep(MAIN_LOOP_DELAY)
+        time.sleep( config.getfloat('defaults', 'main_loop_delay') )
 
 
 if __name__ == '__main__':

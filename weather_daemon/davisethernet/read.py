@@ -197,125 +197,170 @@ def HILOWS(sock):
             data['year_high_bar']  = float(struct.unpack('<H',buffer[11:13])[0])/1000.0
             # Times stored as hour * 100 + min.
             t   = struct.unpack('<H',buffer[13:15])[0]
-            hr = int(t/100)
-            mn = int(t-hr*100)
-            data['time_low_bar'] = '{}:{}'.format(hr,mn)
+            if t == 65535:
+                data['time_low_bar'] = None
+            else:
+                hr = int(t/100)
+                mn = int(t-hr*100)
+                data['time_low_bar'] = '{}:{}'.format(hr,mn)
             t   = struct.unpack('<H',buffer[15:17])[0]
-            hr = int(t/100)
-            mn = int(t-hr*100)
-            data['time_high_bar'] = '{}:{}'.format(hr,mn)
+            if t == 65535:
+                data['time_high_bar'] = None
+            else:
+                hr = int(t/100)
+                mn = int(t-hr*100)
+                data['time_high_bar'] = '{}:{}'.format(hr,mn)
 
             # Wind speed section
-            data['daily_high_wind']  = float(struct.unpack('<B',buffer[17])[0])
+            data['day_high_wind']  = float(struct.unpack('<B',buffer[17])[0])
             t   = struct.unpack('<H',buffer[18:20])[0]
-            hr = int(t/100)
-            mn = int(t-hr*100)
-            data['time_high_wind'] = '{}:{}'.format(hr,mn)
+            if t == 65535:
+                data['time_high_wind'] = None
+            else:
+                hr = int(t/100)
+                mn = int(t-hr*100)
+                data['time_high_wind'] = '{}:{}'.format(hr,mn)
             data['month_high_wind'] = float(struct.unpack('<B',buffer[20])[0])
             data['year_high_wind'] = float(struct.unpack('<B',buffer[21])[0])
 
             # Inside temperature section
-            data['daily_high_in_temp']  = float(struct.unpack('<H',buffer[22:24])[0])/10.0
-            data['daily_low_in_temp']  = float(struct.unpack('<H',buffer[24:26])[0])/10.0
+            data['day_high_in_temp']  = float(struct.unpack('<H',buffer[22:24])[0])/10.0
+            data['day_low_in_temp']  = float(struct.unpack('<H',buffer[24:26])[0])/10.0
             t   = struct.unpack('<H',buffer[26:28])[0]
-            hr = int(t/100)
-            mn = int(t-hr*100)
-            data['time_high_in_temp'] = '{}:{}'.format(hr,mn)
+            if t == 65535:
+                data['time_high_in_temp'] = None
+            else:
+                hr = int(t/100)
+                mn = int(t-hr*100)
+                data['time_high_in_temp'] = '{}:{}'.format(hr,mn)
             t   = struct.unpack('<H',buffer[28:30])[0]
-            hr = int(t/100)
-            mn = int(t-hr*100)
-            data['time_low_in_temp'] = '{}:{}'.format(hr,mn)
+            if t == 65535:
+                data['time_low_in_temp'] = None
+            else:
+                hr = int(t/100)
+                mn = int(t-hr*100)
+                data['time_low_in_temp'] = '{}:{}'.format(hr,mn)
             data['month_low_in_temp'] = float(struct.unpack('<h',buffer[30:32])[0])/10.0
             data['month_high_in_temp'] = float(struct.unpack('<h',buffer[32:34])[0])/10.0
             data['year_low_in_temp'] = float(struct.unpack('<h',buffer[34:36])[0])/10.0
             data['year_high_in_temp'] = float(struct.unpack('<h',buffer[36:38])[0])/10.0
 
             # Inside humidity section
-            data['daily_high_in_hum'] = float(struct.unpack('<B',buffer[38])[0])
-            data['daily_low_in_hum']  = float(struct.unpack('<B',buffer[39])[0])
+            data['day_high_in_hum'] = float(struct.unpack('<B',buffer[38])[0])
+            data['day_low_in_hum']  = float(struct.unpack('<B',buffer[39])[0])
             t   = struct.unpack('<H',buffer[40:42])[0]
-            hr = int(t/100)
-            mn = int(t-hr*100)
-            data['time_high_in_hum'] = '{}:{}'.format(hr,mn)
+            if t == 65535:
+                data['time_high_in_hum'] = None
+            else:
+                hr = int(t/100)
+                mn = int(t-hr*100)
+                data['time_high_in_hum'] = '{}:{}'.format(hr,mn)
             t   = struct.unpack('<H',buffer[42:44])[0]
-            hr = int(t/100)
-            mn = int(t-hr*100)
-            data['time_low_in_hum'] = '{}:{}'.format(hr,mn)
+            if t == 65535:
+                data['time_low_in_hum'] = None
+            else:
+                hr = int(t/100)
+                mn = int(t-hr*100)
+                data['time_low_in_hum'] = '{}:{}'.format(hr,mn)
             data['month_high_in_hum'] = float(struct.unpack('<B',buffer[44])[0])
             data['month_low_in_hum'] = float(struct.unpack('<B',buffer[45])[0])
             data['year_high_in_hum'] = float(struct.unpack('<B',buffer[46])[0])
             data['year_low_in_hum'] = float(struct.unpack('<B',buffer[47])[0])
 
             # Outside temperature section
-            data['daily_low_out_temp']  = float(struct.unpack('<H',buffer[48:50])[0])/10.0
-            data['daily_high_out_temp']  = float(struct.unpack('<H',buffer[50:52])[0])/10.0
+            data['day_low_out_temp']  = float(struct.unpack('<H',buffer[48:50])[0])/10.0
+            data['day_high_out_temp']  = float(struct.unpack('<H',buffer[50:52])[0])/10.0
             t   = struct.unpack('<H',buffer[52:54])[0]
-            hr = int(t/100)
-            mn = int(t-hr*100)
-            data['time_low_out_temp'] = '{}:{}'.format(hr,mn)
+            if t == 65535:
+                data['time_low_out_temp'] = None
+            else:
+                hr = int(t/100)
+                mn = int(t-hr*100)
+                data['time_low_out_temp'] = '{}:{}'.format(hr,mn)
             t   = struct.unpack('<H',buffer[54:56])[0]
-            hr = int(t/100)
-            mn = int(t-hr*100)
-            data['time_high_out_temp'] = '{}:{}'.format(hr,mn)
+            if t == 65535:
+                data['time_high_out_temp'] = None
+            else:
+                hr = int(t/100)
+                mn = int(t-hr*100)
+                data['time_high_out_temp'] = '{}:{}'.format(hr,mn)
             data['month_high_out_temp'] = float(struct.unpack('<h',buffer[56:58])[0])/10.0
             data['month_low_out_temp'] = float(struct.unpack('<h',buffer[58:60])[0])/10.0
             data['year_high_out_temp'] = float(struct.unpack('<h',buffer[60:62])[0])/10.0
             data['year_low_out_temp'] = float(struct.unpack('<h',buffer[62:64])[0])/10.0
 
             # Dew point section
-            data['daily_low_dew']  = float(struct.unpack('<H',buffer[64:66])[0])
-            data['daily_high_dew']  = float(struct.unpack('<H',buffer[66:68])[0])
+            data['day_low_dew']  = float(struct.unpack('<H',buffer[64:66])[0])
+            data['day_high_dew']  = float(struct.unpack('<H',buffer[66:68])[0])
             t   = struct.unpack('<H',buffer[68:70])[0]
-            hr = int(t/100)
-            mn = int(t-hr*100)
-            data['time_low_dew'] = '{}:{}'.format(hr,mn)
+            if t == 65535:
+                data['time_low_dew'] = None
+            else:
+                hr = int(t/100)
+                mn = int(t-hr*100)
+                data['time_low_dew'] = '{}:{}'.format(hr,mn)
             t   = struct.unpack('<H',buffer[70:72])[0]
-            hr = int(t/100)
-            mn = int(t-hr*100)
-            data['time_high_dew'] = '{}:{}'.format(hr,mn)
+            if t == 65535:
+                data['time_high_dew'] = None
+            else:
+                hr = int(t/100)
+                mn = int(t-hr*100)
+                data['time_high_dew'] = '{}:{}'.format(hr,mn)
             data['month_high_dew'] = float(struct.unpack('<h',buffer[72:74])[0])
             data['month_low_dew'] = float(struct.unpack('<h',buffer[74:76])[0])
             data['year_high_dew'] = float(struct.unpack('<h',buffer[76:78])[0])
             data['year_low_dew'] = float(struct.unpack('<h',buffer[78:80])[0])
 
             # Wind chill section
-            data['daily_low_wchill']  = float(struct.unpack('<h',buffer[80:82])[0])
+            data['day_low_wchill']  = float(struct.unpack('<h',buffer[80:82])[0])
             t   = struct.unpack('<H',buffer[82:84])[0]
-            hr = int(t/100)
-            mn = int(t-hr*100)
-            data['time_low_wchill'] = '{}:{}'.format(hr,mn)
+            if t == 65535:
+                data['time_low_wchill'] = None
+            else:
+                hr = int(t/100)
+                mn = int(t-hr*100)
+                data['time_low_wchill'] = '{}:{}'.format(hr,mn)
             data['month_low_wchill']  = float(struct.unpack('<h',buffer[84:86])[0])
             data['year_low_wchill']  = float(struct.unpack('<h',buffer[86:88])[0])
 
             # Heat index section
-            data['daily_high_heat']  = float(struct.unpack('<h',buffer[88:90])[0])
+            data['day_high_heat']  = float(struct.unpack('<h',buffer[88:90])[0])
             t   = struct.unpack('<H',buffer[90:92])[0]
-            hr = int(t/100)
-            mn = int(t-hr*100)
-            data['time_high_heat'] = '{}:{}'.format(hr,mn)
+            if t == 65535:
+                data['time_high_heat'] = None
+            else:
+                hr = int(t/100)
+                mn = int(t-hr*100)
+                data['time_high_heat'] = '{}:{}'.format(hr,mn)
             data['month_high_heat']  = float(struct.unpack('<h',buffer[92:94])[0])
             data['year_high_heat']  = float(struct.unpack('<h',buffer[94:96])[0])
 
             # THSW section
-            data['daily_high_THSW']  = float(struct.unpack('<h',buffer[96:98])[0])
+            data['day_high_THSW']  = float(struct.unpack('<h',buffer[96:98])[0])
             t   = struct.unpack('<H',buffer[98:100])[0]
-            hr = int(t/100)
-            mn = int(t-hr*100)
-            data['time_high_THSW'] = '{}:{}'.format(hr,mn)
+            if t == 65535:
+                data['time_high_THSW'] = None
+            else:
+                hr = int(t/100)
+                mn = int(t-hr*100)
+                data['time_high_THSW'] = '{}:{}'.format(hr,mn)
             data['month_high_THSW']  = float(struct.unpack('<h',buffer[100:102])[0])
             data['year_high_THSW']  = float(struct.unpack('<h',buffer[102:104])[0])
 
             # Solar radiation section
-            data['daily_high_sol_rad']  = float(struct.unpack('<H',buffer[104:106])[0])
+            data['day_high_sol_rad']  = float(struct.unpack('<H',buffer[104:106])[0])
             t   = struct.unpack('<H',buffer[106:108])[0]
-            hr = int(t/100)
-            mn = int(t-hr*100)
-            data['time_high_sol_rad'] = '{}:{}'.format(hr,mn)
+            if t == 65535:
+                data['time_high_sol_rad'] = None
+            else:
+                hr = int(t/100)
+                mn = int(t-hr*100)
+                data['time_high_sol_rad'] = '{}:{}'.format(hr,mn)
             data['month_high_sol_rad']  = float(struct.unpack('<H',buffer[108:110])[0])
             data['year_high_sol_rad']  = float(struct.unpack('<H',buffer[110:112])[0])
 
             # Rain rate section
-            data['daily_high_rain_rate']  = float(struct.unpack('<H',buffer[117:119])[0])*0.01
+            data['day_high_rain_rate']  = float(struct.unpack('<H',buffer[117:119])[0])*0.01
             t   = struct.unpack('<H',buffer[119:121])[0]
             if t == 65535:
                 data['time_high_rain_rate'] = None
