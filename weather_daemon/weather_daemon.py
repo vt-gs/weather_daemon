@@ -100,7 +100,7 @@ def main():
         logger.setLevel(logging.CRITICAL)
 
     if config.getboolean('logging', 'log_to_file'):
-        handler = logging.FileHandler(args.log_path)
+        handler = logging.FileHandler(config.get('logging', 'path'))
     else:
         handler = logging.StreamHandler(sys.stdout)
     formatter = logging.Formatter(LOG_FORMAT)
@@ -170,7 +170,7 @@ def main():
     # ensure we always have a connection.
     wx_ip = config.get('station', 'host')
     wx_port = config.getint('station', 'port')
-    sock = davisethernet.connect(wx_ip, wx_port, num_retry=5, retry_delay=2, timeout=2)
+    sock = davisethernet.connect(wx_ip, wx_port, num_retry=5, retry_delay=2, timeout=0.1)
     while True:
         # ...each time through the loop...
         # when are we?
@@ -204,9 +204,13 @@ def main():
         # need/want.  REVIEW: We're pulling all the data each time through the
         # loop even though we probably don't need it all.  This is a bit
         # inefficient but since there isn't too much data it should be OK.
+	logger.debug('Querying station')
         loop   = davisethernet.read.LOOP(sock)
+        logger.debug('Have LOOP')
         loop2  = davisethernet.read.LOOP2(sock)
+        logger.debug('Have LOOP2')
         hldata = davisethernet.read.HILOWS(sock)
+        logger.debug('Have weather data')
         # Create the "combined" dictinary.  This is the complete set of data
         # key-values that we'll extract message data from.
         combined = loop.copy()
@@ -230,6 +234,7 @@ def main():
                 # message was pulled from the YAML file.  REVIEW: we're assuming
                 # that the messages are simple JSON dictionaries (maps) - probably
                 # OK but we may want to support different message types/structures.
+                logger.debug('Sending data')
                 producer.send(json.dumps(mess), messages[i]['routing_key'])
 
                 # Since we just sent the message, increment the trigger time

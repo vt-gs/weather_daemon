@@ -15,7 +15,7 @@
 
 -
    routing_key: weather.wind
-   delay: 5
+   delay: 3
    keys:
       - wind_speed
       - wind_dir
@@ -26,13 +26,13 @@
 
 -
    routing_key: weather.inside.temperature
-   delay: 300
+   delay: 30
    keys:
       - inside_temp
 
 -
    routing_key: weather.outside.temperature
-   delay: 300
+   delay: 30
    keys:
        - outside_temp
 
@@ -50,7 +50,7 @@
 
 -
    routing_key: weather.outside.solar
-   delay: 900
+   delay: 90
    keys:
       - sunrise
       - sunset
