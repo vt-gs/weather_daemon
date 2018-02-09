@@ -60,9 +60,6 @@ import sys
 from datetime import timedelta, datetime
 import logging
 import json
-
-#from optparse import OptionParser
-from main_thread import *
 import argparse
 import ConfigParser # Note that this is renamed to configparser in Python 3
 import yaml
@@ -254,5 +251,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-    
-
